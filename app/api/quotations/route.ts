@@ -1,0 +1,4 @@
+import {NextResponse} from "next/server";import {z} from "zod";import {prisma} from "@/lib/prisma";
+const schema=z.object({number:z.string().min(2),customerId:z.coerce.number().int(),date:z.coerce.date(),amount:z.coerce.number().min(0),salesperson:z.string().min(2),status:z.enum(["PENDING","ACCEPTED","REJECTED","COMPLETED"]),notes:z.string().optional().nullable()});
+export async function GET(){return NextResponse.json(await prisma.quotation.findMany({include:{customer:true},orderBy:{date:"desc"}}))}
+export async function POST(req:Request){const p=schema.safeParse(await req.json());if(!p.success)return NextResponse.json({error:"Invalid quotation data"},{status:400});try{return NextResponse.json(await prisma.quotation.create({data:p.data,include:{customer:true}}),{status:201})}catch{return NextResponse.json({error:"Quotation number already exists"},{status:409})}}

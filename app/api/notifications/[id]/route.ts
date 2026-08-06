@@ -1,0 +1,3 @@
+import {NextResponse} from "next/server";import {z} from "zod";import {prisma} from "@/lib/prisma";const schema=z.object({title:z.string().min(2),message:z.string().min(2),type:z.string().min(2),read:z.boolean()});
+export async function PUT(req:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;const p=schema.safeParse(await req.json());if(!p.success)return NextResponse.json({error:"Invalid notification data"},{status:400});return NextResponse.json(await prisma.notification.update({where:{id:Number(id)},data:p.data}))}
+export async function DELETE(_:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;await prisma.notification.delete({where:{id:Number(id)}});return NextResponse.json({ok:true})}

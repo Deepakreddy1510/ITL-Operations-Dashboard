@@ -1,0 +1,4 @@
+import {NextResponse} from "next/server";import {z} from "zod";import {prisma} from "@/lib/prisma";const schema=z.object({title:z.string().min(2),message:z.string().min(2),type:z.string().min(2),read:z.boolean().default(false)});
+export async function GET(){return NextResponse.json(await prisma.notification.findMany({orderBy:{createdAt:"desc"}}))}
+export async function POST(req:Request){const p=schema.safeParse(await req.json());if(!p.success)return NextResponse.json({error:"Invalid notification data"},{status:400});return NextResponse.json(await prisma.notification.create({data:p.data}),{status:201})}
+export async function PATCH(req:Request){const body=await req.json();if(body.action!=="markAllRead")return NextResponse.json({error:"Unknown action"},{status:400});await prisma.notification.updateMany({data:{read:true}});return NextResponse.json({ok:true})}

@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum QuotationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+enum OrderStatus {
+  PENDING
+  PRODUCTION
+  PACKING
+  READY
+  DISPATCHED
+  DELIVERED
+  DELAYED
+  CANCELLED
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  isActive     Boolean  @default(true)
+  isAdmin      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Customer {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  phone       String?
+  location    String?
+  outstanding Float       @default(0)
+  quotations  Quotation[]
+  orders      Order[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Quotation {
+  id          Int             @id @default(autoincrement())
+  number      String          @unique
+  customerId  Int
+  customer    Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  date        DateTime
+  amount      Float
+  salesperson String
+  status      QuotationStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  number       String      @unique
+  customerId   Int
+  customer     Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items        String
+  quantity     Float
+  orderDate    DateTime
+  deliveryDate DateTime
+  amount       Float
+  status       OrderStatus @default(PENDING)
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Material {
+  id               Int      @id @default(autoincrement())
+  name             String   @unique
+  currentStock     Float
+  minimumStock     Float
+  unit             String   @default("Ton")
+  supplier         String
+  lastPurchaseDate DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Purchase {
+  id           Int      @id @default(autoincrement())
+  supplier     String
+  material     String
+  quantity     Float
+  amount       Float
+  invoice      String    @unique
+  purchaseDate DateTime
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  type      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

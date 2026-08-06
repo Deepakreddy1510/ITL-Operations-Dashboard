@@ -1,0 +1,4 @@
+import {NextResponse} from "next/server";import {z} from "zod";import {prisma} from "@/lib/prisma";
+const schema=z.object({number:z.string().min(2),customerId:z.coerce.number().int(),items:z.string().min(2),quantity:z.coerce.number().positive(),orderDate:z.coerce.date(),deliveryDate:z.coerce.date(),amount:z.coerce.number().min(0),status:z.enum(["PENDING","PRODUCTION","PACKING","READY","DISPATCHED","DELIVERED","DELAYED","CANCELLED"]),notes:z.string().optional().nullable()});
+export async function GET(){return NextResponse.json(await prisma.order.findMany({include:{customer:true},orderBy:{orderDate:"desc"}}))}
+export async function POST(req:Request){const p=schema.safeParse(await req.json());if(!p.success)return NextResponse.json({error:"Invalid order data"},{status:400});try{return NextResponse.json(await prisma.order.create({data:p.data,include:{customer:true}}),{status:201})}catch{return NextResponse.json({error:"Order number already exists"},{status:409})}}
