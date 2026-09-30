@@ -1,4 +1,4 @@
-# Hyderabad Branch Manager Dashboard
+# Branch Manager Dashboard
 
 A small multi-user CRUD dashboard for the Hyderabad branch of a pipe manufacturing company.
 
